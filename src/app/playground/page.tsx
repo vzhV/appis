@@ -42,9 +42,11 @@ export default function PlaygroundPage() {
         });
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error validating API key:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Error validating API key';
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
+        : 'Error validating API key';
       
       setToast({
         message: errorMessage,
@@ -125,7 +127,7 @@ export default function PlaygroundPage() {
                 <h3 className="text-sm font-medium text-blue-800 mb-1">How it works</h3>
                 <p className="text-sm text-blue-700">
                   Your API key will be validated immediately when you submit the form. 
-                  If valid, you'll be redirected to the protected area. If invalid, you'll see an error message here.
+                  If valid, you&apos;ll be redirected to the protected area. If invalid, you&apos;ll see an error message here.
                 </p>
               </div>
             </div>

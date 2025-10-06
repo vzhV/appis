@@ -18,7 +18,7 @@ export const copyToClipboard = async (
     await navigator.clipboard.writeText(text);
     setToast({ message: 'API key copied to clipboard!', type: 'success' });
     setTimeout(() => setToast(null), 3000);
-  } catch (error) {
+  } catch {
     setToast({ message: 'Failed to copy API key', type: 'error' });
     setTimeout(() => setToast(null), 3000);
   }
