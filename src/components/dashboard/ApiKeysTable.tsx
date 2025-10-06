@@ -7,7 +7,6 @@ interface ApiKeysTableProps {
   onCreateKey: () => void;
   onEditKey: (key: ApiKey) => void;
   onDeleteKey: (id: string) => void;
-  onToggleKey: (id: string) => void;
   onCopyKey?: (text: string) => void;
 }
 
@@ -15,8 +14,7 @@ export default function ApiKeysTable({
   apiKeys, 
   onCreateKey, 
   onEditKey, 
-  onDeleteKey, 
-  onToggleKey,
+  onDeleteKey,
   onCopyKey
 }: ApiKeysTableProps) {
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());

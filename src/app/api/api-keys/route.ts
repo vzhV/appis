@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '../../../../lib/supabase';
 
 // GET /api/api-keys - Get all API keys
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const { data: apiKeys, error } = await supabaseAdmin
       .from('api_keys')
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const newApiKeyData = {
       name: name.trim(),
       key: generateApiKey(),
-      type: type,
+      type,
       usage: 0,
       monthly_limit: monthlyLimit || null,
       is_active: true,
@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     
     if (name !== undefined) {
       if (typeof name !== 'string' || name.trim().length === 0) {

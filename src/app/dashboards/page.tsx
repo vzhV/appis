@@ -19,7 +19,6 @@ export default function Dashboard() {
     setToast,
     createApiKey,
     updateApiKey,
-    toggleApiKey,
     deleteApiKey,
   } = useApiKeys();
 
@@ -124,7 +123,6 @@ export default function Dashboard() {
           onCreateKey={() => setShowCreateForm(true)}
           onEditKey={handleEditKey}
           onDeleteKey={handleDeleteKey}
-          onToggleKey={toggleApiKey}
           onCopyKey={handleCopyToClipboard}
         />
       </div>

@@ -37,12 +37,14 @@ export const useApiKeys = () => {
         return true;
       } else {
         console.error('Failed to create API key:', response.data.error);
-        showToast('Failed to create API key: ' + response.data.error, 'error', setToast);
+        showToast(`Failed to create API key: ${response.data.error}`, 'error', setToast);
         return false;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating API key:', error);
-      const errorMessage = error.response?.data?.error || 'Error creating API key';
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
+        : 'Error creating API key';
       showToast(errorMessage, 'error', setToast);
       return false;
     }
@@ -60,11 +62,13 @@ export const useApiKeys = () => {
         showToast('API key updated successfully', 'success', setToast);
         return true;
       } else {
-        showToast('Failed to update API key: ' + response.data.error, 'error', setToast);
+        showToast(`Failed to update API key: ${response.data.error}`, 'error', setToast);
         return false;
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Error updating API key';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
+        : 'Error updating API key';
       showToast(errorMessage, 'error', setToast);
       return false;
     }
@@ -85,12 +89,14 @@ export const useApiKeys = () => {
         return true;
       } else {
         console.error('Failed to toggle API key:', response.data.error);
-        showToast('Failed to toggle API key: ' + response.data.error, 'error', setToast);
+        showToast(`Failed to toggle API key: ${response.data.error}`, 'error', setToast);
         return false;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error toggling API key:', error);
-      const errorMessage = error.response?.data?.error || 'Error toggling API key';
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
+        : 'Error toggling API key';
       showToast(errorMessage, 'error', setToast);
       return false;
     }
@@ -105,12 +111,14 @@ export const useApiKeys = () => {
         return true;
       } else {
         console.error('Failed to delete API key:', response.data.error);
-        showToast('Failed to delete API key: ' + response.data.error, 'error', setToast);
+        showToast(`Failed to delete API key: ${response.data.error}`, 'error', setToast);
         return false;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting API key:', error);
-      const errorMessage = error.response?.data?.error || 'Error deleting API key';
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
+        : 'Error deleting API key';
       showToast(errorMessage, 'error', setToast);
       return false;
     }
