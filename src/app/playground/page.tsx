@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import NavigationLayout from '@/components/layout/NavigationLayout';
-import Toast from '@/components/ui/Toast';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function PlaygroundPage() {
+function PlaygroundContent() {
+  const { session } = useAuth();
   const [apiKey, setApiKey] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,9 +20,14 @@ export default function PlaygroundPage() {
     setIsSubmitting(true);
     
     try {
-      // Validate API key first
+      // Validate API key with authentication
       const response = await axios.post('/api/validate-api-key', {
         apiKey: apiKey.trim()
+      }, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        }
       });
 
       const data = response.data;
@@ -35,11 +41,15 @@ export default function PlaygroundPage() {
         const encodedMessage = encodeURIComponent(data.message);
         router.push(`/protected?valid=true&message=${encodedMessage}`);
       } else {
-        // API key is invalid, show error toast
-        setToast({
-          message: data.message,
-          type: 'error'
-        });
+        // API key is invalid, show error notification
+        if (typeof window !== 'undefined' && (window as any).addNotification) {
+          (window as any).addNotification({
+            type: 'api_alerts',
+            title: 'API Key Invalid',
+            message: data.message,
+            duration: 5000,
+          });
+        }
       }
       
     } catch (error: unknown) {
@@ -48,17 +58,18 @@ export default function PlaygroundPage() {
         ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
         : 'Error validating API key';
       
-      setToast({
-        message: errorMessage,
-        type: 'error'
-      });
+      // Show error notification
+      if (typeof window !== 'undefined' && (window as any).addNotification) {
+        (window as any).addNotification({
+          type: 'api_alerts',
+          title: 'Validation Error',
+          message: errorMessage,
+          duration: 5000,
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleCloseToast = () => {
-    setToast(null);
   };
 
   return (
@@ -134,8 +145,14 @@ export default function PlaygroundPage() {
           </div>
         </div>
       </div>
-
-      <Toast toast={toast} onClose={handleCloseToast} />
     </NavigationLayout>
+  );
+}
+
+export default function PlaygroundPage() {
+  return (
+    <ProtectedRoute>
+      <PlaygroundContent />
+    </ProtectedRoute>
   );
 }

@@ -1,5 +1,3 @@
-import { ToastMessage } from '@/types/api-keys';
-
 export const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -10,25 +8,30 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
-export const copyToClipboard = async (
-  text: string,
-  setToast: (toast: ToastMessage | null) => void
-): Promise<void> => {
+export const copyToClipboard = async (text: string): Promise<void> => {
   try {
     await navigator.clipboard.writeText(text);
-    setToast({ message: 'API key copied to clipboard!', type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  } catch {
-    setToast({ message: 'Failed to copy API key', type: 'error' });
-    setTimeout(() => setToast(null), 3000);
+    
+    // Use the new notification system
+    if (typeof window !== 'undefined' && (window as any).addNotification) {
+      (window as any).addNotification({
+        type: 'api_alerts',
+        title: 'Copied to Clipboard',
+        message: 'API key copied to clipboard successfully',
+        duration: 3000,
+      });
+    }
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error);
+    
+    // Use the new notification system for errors too
+    if (typeof window !== 'undefined' && (window as any).addNotification) {
+      (window as any).addNotification({
+        type: 'api_alerts',
+        title: 'Copy Failed',
+        message: 'Failed to copy to clipboard',
+        duration: 3000,
+      });
+    }
   }
-};
-
-export const showToast = (
-  message: string,
-  type: 'success' | 'error',
-  setToast: (toast: ToastMessage | null) => void
-): void => {
-  setToast({ message, type });
-  setTimeout(() => setToast(null), 3000);
 };

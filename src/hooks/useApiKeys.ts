@@ -1,137 +1,150 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { ApiKey, CreateApiKeyRequest, UpdateApiKeyRequest, ToastMessage } from '@/types/api-keys';
-import { showToast } from '@/utils/api-keys';
+import { useState, useEffect, useCallback } from 'react';
+import { apiKeysApi } from '@/lib/api/api-keys-api';
+import type { ApiKey, CreateApiKeyRequest, UpdateApiKeyRequest } from '@/types/api-keys';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSettingsContext } from '@/contexts/SettingsContext';
+import { logApiKeyAction } from '@/utils/logger';
 
-export const useApiKeys = () => {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [toast, setToast] = useState<ToastMessage | null>(null);
+interface UseApiKeysReturn {
+  readonly apiKeys: readonly ApiKey[];
+  readonly isLoading: boolean;
+  readonly createApiKey: (request: CreateApiKeyRequest) => Promise<boolean>;
+  readonly updateApiKey: (request: UpdateApiKeyRequest) => Promise<boolean>;
+  readonly deleteApiKey: (id: string) => Promise<boolean>;
+}
+
+export const useApiKeys = (): UseApiKeysReturn => {
+  const { session } = useAuth();
+  const { settings } = useSettingsContext();
+  const [apiKeys, setApiKeys] = useState<readonly ApiKey[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Helper function to show notifications
+  const showNotification = (title: string, message: string, _type: 'success' | 'error' = 'success'): void => {
+    if (typeof window !== 'undefined' && (window as any).addNotification) {
+      (window as any).addNotification({
+        type: 'api_alerts',
+        title,
+        message,
+        duration: 5000,
+      });
+    }
+  };
 
   // Fetch API keys from the API
   useEffect(() => {
-    const fetchApiKeys = async () => {
+    const fetchApiKeys = async (): Promise<void> => {
+      if (!session?.access_token) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const response = await axios.get('/api/api-keys');
-        if (response.data.success) {
-          setApiKeys(response.data.data);
-        } else {
-          console.error('Failed to fetch API keys:', response.data.error);
+        const response = await apiKeysApi.getAll();
+        if (response.success) {
+          setApiKeys(response.data);
         }
-      } catch (error) {
-        console.error('Error fetching API keys:', error);
+      } catch {
+        // Error handled by toast notification
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchApiKeys();
-  }, []);
+    void fetchApiKeys();
+  }, [session?.access_token]);
 
-  const createApiKey = async (request: CreateApiKeyRequest): Promise<boolean> => {
+  const createApiKey = useCallback(async (request: CreateApiKeyRequest): Promise<boolean> => {
     try {
-      const response = await axios.post('/api/api-keys', request);
-      if (response.data.success) {
-        setApiKeys(prev => [response.data.data, ...prev]);
-        showToast('API key created successfully', 'success', setToast);
+      // Apply default limit from settings if not specified
+      const requestWithDefaults: CreateApiKeyRequest = {
+        ...request,
+        monthlyLimit: request.monthlyLimit || settings?.api_preferences?.default_limit || 1000,
+      };
+
+      const response = await apiKeysApi.create(requestWithDefaults);
+      if (response.success) {
+        setApiKeys(prev => [response.data, ...prev]);
+        showNotification('API Key Created', 'API key created successfully');
+        
+        // Log the creation
+        await logApiKeyAction('create_key', response.data.id, request.name, {
+          key_type: request.type,
+          monthly_limit: requestWithDefaults.monthlyLimit,
+        });
         return true;
       } else {
-        console.error('Failed to create API key:', response.data.error);
-        showToast(`Failed to create API key: ${response.data.error}`, 'error', setToast);
+        showNotification('API Key Creation Failed', `Failed to create API key: ${response.error}`, 'error');
         return false;
       }
     } catch (error: unknown) {
-      console.error('Error creating API key:', error);
-      const errorMessage = error instanceof Error && 'response' in error 
+      const errorMessage = error instanceof Error && 'response' in error
         ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
         : 'Error creating API key';
-      showToast(errorMessage, 'error', setToast);
+      showNotification('API Key Creation Failed', errorMessage, 'error');
       return false;
     }
-  };
+  }, [settings]);
 
-  const updateApiKey = async (request: UpdateApiKeyRequest): Promise<boolean> => {
+  const updateApiKey = useCallback(async (request: UpdateApiKeyRequest): Promise<boolean> => {
     try {
-      const response = await axios.put('/api/api-keys', request);
-      if (response.data.success) {
-        setApiKeys(prev => 
-          prev.map(key => 
-            key.id === request.id ? { ...response.data.data } : key
-          )
-        );
-        showToast('API key updated successfully', 'success', setToast);
+      const response = await apiKeysApi.update(request);
+      if (response.success) {
+        setApiKeys(prev => prev.map(key => 
+          key.id === request.id ? response.data : key
+        ));
+        showNotification('API Key Updated', 'API key updated successfully');
+        // Log the update
+        await logApiKeyAction('edit_key', request.id, request.name, {
+          key_type: request.type,
+          monthly_limit: request.monthlyLimit,
+        });
         return true;
       } else {
-        showToast(`Failed to update API key: ${response.data.error}`, 'error', setToast);
+        showNotification('API Key Update Failed', `Failed to update API key: ${response.error}`, 'error');
         return false;
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error 
         ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
         : 'Error updating API key';
-      showToast(errorMessage, 'error', setToast);
+      showNotification('API Key Update Failed', errorMessage, 'error');
       return false;
     }
-  };
+  }, []);
 
-  const toggleApiKey = async (id: string): Promise<boolean> => {
+  const deleteApiKey = useCallback(async (id: string): Promise<boolean> => {
     try {
-      const key = apiKeys.find(k => k.id === id);
-      if (!key) return false;
-
-      const response = await axios.put('/api/api-keys', { id, isActive: !key.is_active });
-      if (response.data.success) {
-        setApiKeys(prev => 
-          prev.map(k => 
-            k.id === id ? { ...k, is_active: !k.is_active } : k
-          )
-        );
-        return true;
-      } else {
-        console.error('Failed to toggle API key:', response.data.error);
-        showToast(`Failed to toggle API key: ${response.data.error}`, 'error', setToast);
-        return false;
-      }
-    } catch (error: unknown) {
-      console.error('Error toggling API key:', error);
-      const errorMessage = error instanceof Error && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
-        : 'Error toggling API key';
-      showToast(errorMessage, 'error', setToast);
-      return false;
-    }
-  };
-
-  const deleteApiKey = async (id: string): Promise<boolean> => {
-    try {
-      const response = await axios.delete(`/api/api-keys?id=${id}`);
-      if (response.data.success) {
+      // Get the key name before deletion for logging
+      const keyToDelete = apiKeys.find(key => key.id === id);
+      
+      const response = await apiKeysApi.delete(id);
+      if (response.success) {
         setApiKeys(prev => prev.filter(key => key.id !== id));
-        showToast('API key deleted successfully', 'success', setToast);
+        showNotification('API Key Deleted', 'API key deleted successfully');
+        // Log the deletion
+        await logApiKeyAction('delete_key', id, keyToDelete?.name, {
+          key_type: keyToDelete?.type,
+        });
         return true;
       } else {
-        console.error('Failed to delete API key:', response.data.error);
-        showToast(`Failed to delete API key: ${response.data.error}`, 'error', setToast);
+        showNotification('API Key Deletion Failed', `Failed to delete API key: ${response.error}`, 'error');
         return false;
       }
     } catch (error: unknown) {
-      console.error('Error deleting API key:', error);
       const errorMessage = error instanceof Error && 'response' in error 
         ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
         : 'Error deleting API key';
-      showToast(errorMessage, 'error', setToast);
+      showNotification('API Key Deletion Failed', errorMessage, 'error');
       return false;
     }
-  };
+  }, [apiKeys]);
 
   return {
     apiKeys,
     isLoading,
-    toast,
-    setToast,
     createApiKey,
     updateApiKey,
-    toggleApiKey,
     deleteApiKey,
   };
 };

@@ -1,42 +1,46 @@
+export type ApiKeyType = 'development' | 'production';
+
+export type ToastType = 'success' | 'error';
+
 export interface ApiKey {
-  id: string;
-  name: string;
-  key: string;
-  type: 'development' | 'production';
-  usage: number;
-  monthly_limit?: number;
-  created_at: string;
-  last_used?: string;
-  is_active: boolean;
+  readonly id: string;
+  readonly name: string;
+  readonly key: string;
+  readonly type: ApiKeyType;
+  readonly usage: number;
+  readonly monthly_limit?: number | null;
+  readonly created_at: string;
+  readonly last_used?: string | null;
+  readonly is_active: boolean;
 }
 
 export interface CreateApiKeyRequest {
-  name: string;
-  type: 'development' | 'production';
-  monthlyLimit?: number | null;
+  readonly name: string;
+  readonly type: ApiKeyType;
+  readonly monthlyLimit?: number | null;
 }
 
 export interface UpdateApiKeyRequest {
-  id: string;
-  name: string;
-  type: 'development' | 'production';
-  monthlyLimit?: number | null;
-  isActive: boolean;
+  readonly id: string;
+  readonly name: string;
+  readonly type: ApiKeyType;
+  readonly monthlyLimit?: number | null;
+  readonly isActive: boolean;
 }
 
 export interface ApiKeyResponse {
-  success: boolean;
-  data: ApiKey;
-  error?: string;
+  readonly success: boolean;
+  readonly data: ApiKey;
+  readonly error?: string;
 }
 
 export interface ApiKeysListResponse {
-  success: boolean;
-  data: ApiKey[];
-  error?: string;
+  readonly success: boolean;
+  readonly data: readonly ApiKey[];
+  readonly error?: string;
 }
 
 export interface ToastMessage {
-  message: string;
-  type: 'success' | 'error';
+  readonly message: string;
+  readonly type: ToastType;
 }
