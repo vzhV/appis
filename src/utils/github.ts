@@ -28,7 +28,7 @@ export async function fetchGithubReadme(githubUrl: string): Promise<string | nul
   let axios;
   try {
     axios = (await import('axios')).default;
-  } catch (e) {
+  } catch {
     throw new Error('axios is required');
   }
 
@@ -39,7 +39,7 @@ export async function fetchGithubReadme(githubUrl: string): Promise<string | nul
       readmeContent = mainRes.data;
       return readmeContent;
     }
-  } catch (e) {
+  } catch {
     // ignore and try master
   }
 
@@ -50,7 +50,7 @@ export async function fetchGithubReadme(githubUrl: string): Promise<string | nul
       readmeContent = masterRes.data;
       return readmeContent;
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 
