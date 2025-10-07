@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { ApiKey } from '@/types/api-keys';
+import { useState, useCallback } from 'react';
+import type { ApiKey } from '@/types/api-keys';
 import { copyToClipboard } from '@/utils/api-keys';
 
 interface ApiKeysTableProps {
-  apiKeys: ApiKey[];
-  onCreateKey: () => void;
-  onEditKey: (key: ApiKey) => void;
-  onDeleteKey: (id: string) => void;
-  onCopyKey?: (text: string) => void;
+  readonly apiKeys: readonly ApiKey[];
+  readonly onCreateKey: () => void;
+  readonly onEditKey: (key: ApiKey) => void;
+  readonly onDeleteKey: (id: string) => void;
+  readonly onCopyKey?: (text: string) => void;
 }
 
 export default function ApiKeysTable({ 
@@ -16,10 +16,10 @@ export default function ApiKeysTable({
   onEditKey, 
   onDeleteKey,
   onCopyKey
-}: ApiKeysTableProps) {
+}: ApiKeysTableProps): React.JSX.Element {
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
 
-  const toggleKeyVisibility = (keyId: string) => {
+  const toggleKeyVisibility = useCallback((keyId: string): void => {
     setVisibleKeys(prev => {
       const newSet = new Set(prev);
       if (newSet.has(keyId)) {
@@ -29,15 +29,15 @@ export default function ApiKeysTable({
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const handleCopyToClipboard = async (text: string) => {
+  const handleCopyToClipboard = useCallback(async (text: string): Promise<void> => {
     if (onCopyKey) {
       await onCopyKey(text);
     } else {
       await copyToClipboard(text, () => {}); // Fallback if no handler provided
     }
-  };
+  }, [onCopyKey]);
 
   if (apiKeys.length === 0) {
     return (

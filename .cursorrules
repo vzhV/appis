@@ -1,0 +1,77 @@
+You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI, and Tailwind.
+
+Code Style and Structure
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files with clear separation: exported component, subcomponents, helpers, static content, and types.
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Favor named exports for components.
+- Always specify the return type for functions.
+- Follow ESLint and Prettier rules strictly.
+
+TypeScript Usage
+- Use TypeScript for all code; avoid plain JavaScript.
+- Prefer interfaces over types for data structures.
+- Avoid enums; use literal unions or object maps.
+- Use explicit function return types everywhere.
+- Use utility types like Partial, Pick, and Omit instead of redefining interfaces.
+- Do not use any type unless absolutely necessary.
+
+Architecture and File Organization
+- Keep a modular monorepo structure: apps/ (Next.js, React Native) and packages/ (shared libs).
+- Use absolute imports with @/ aliases.
+- Keep large components split into smaller subcomponents.
+- Extract logic into helpers and reusable hooks.
+- Define all request and response types in separate /types files.
+- Keep all network calls in dedicated API files (e.g., /lib/api/user-api.ts).
+
+HTTP and Data Fetching
+- Always use Axios for all HTTP requests; never use fetch.
+- Define a central axios instance in /lib/api/axios-instance.ts.
+- Use async/await and typed responses: const { data } = await api.get<User[]>('/users');
+- Keep all API functions pure and typed.
+- Avoid data fetching in client components; use server components or Next.js data fetching methods instead.
+
+React and Next.js
+- Use React Server Components (RSC) by default.
+- Use “use client” only when accessing Web APIs, event handlers, or interactive UI.
+- Wrap client components with Suspense and fallback.
+- Use Next.js App Router and colocate layout.tsx and page.tsx.
+- Use nuqs for URL search parameter state management.
+- Use dynamic imports for non-critical or large components.
+- Keep TSX minimal; avoid large HTML blocks inline.
+- Extract complex JSX into small subcomponents.
+
+UI and Styling
+- Use Shadcn UI, Radix UI, and Tailwind CSS for all UI components.
+- Prefer declarative JSX with semantic structure.
+- Use Tailwind for responsive, mobile-first design.
+- Use cn() helper for conditional classes.
+- Avoid inline styles; rely on Tailwind utilities.
+- Optimize images with Next.js Image component using webp and lazy loading.
+
+Performance and Optimization
+- Use dynamic imports to defer non-critical UI.
+- Optimize for Web Vitals (LCP, CLS, FID).
+- Minimize unnecessary re-renders and client state.
+- Prefer server-rendered data and static generation when possible.
+
+Linting and Rules
+- Follow ESLint configuration with:
+  - eslint-config-next
+  - @typescript-eslint/recommended
+  - plugin:react-hooks/recommended
+- Enforce explicit-function-return-type: error.
+- Disallow unused variables except with underscore prefix.
+- Warn for missing dependency arrays in React hooks.
+- Always fix lint issues before committing.
+
+Summary
+- TypeScript only, always with explicit return types.
+- Axios for all API communication.
+- Split large components into smaller files.
+- Prefer server components; use “use client” sparingly.
+- Follow ESLint, Prettier, and Next.js conventions.
+- Keep code modular, functional, and minimalistic.

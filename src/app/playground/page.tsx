@@ -5,8 +5,11 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import NavigationLayout from '@/components/layout/NavigationLayout';
 import Toast from '@/components/ui/Toast';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function PlaygroundPage() {
+function PlaygroundContent() {
+  const { session } = useAuth();
   const [apiKey, setApiKey] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -19,9 +22,14 @@ export default function PlaygroundPage() {
     setIsSubmitting(true);
     
     try {
-      // Validate API key first
+      // Validate API key with authentication
       const response = await axios.post('/api/validate-api-key', {
         apiKey: apiKey.trim()
+      }, {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        }
       });
 
       const data = response.data;
@@ -137,5 +145,13 @@ export default function PlaygroundPage() {
 
       <Toast toast={toast} onClose={handleCloseToast} />
     </NavigationLayout>
+  );
+}
+
+export default function PlaygroundPage() {
+  return (
+    <ProtectedRoute>
+      <PlaygroundContent />
+    </ProtectedRoute>
   );
 }

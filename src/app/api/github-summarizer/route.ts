@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKeyFromHeader, createApiKeyErrorResponse } from '../../../utils/api-key-validation';
+import { authenticateUser, createUnauthorizedResponse } from '../../../utils/auth-middleware';
 import { fetchGithubReadme } from '../../../utils/github';
 import { generateRepositorySummary } from '../../../utils/summarization';
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate API key
+    // Authenticate the user first
+    const authResult = await authenticateUser(request);
+    if (!authResult.user) {
+      return createUnauthorizedResponse(authResult.error || 'Authentication required');
+    }
+
+    // Validate API key belongs to the authenticated user
     const validationResult = await validateApiKeyFromHeader(request);
     if (!validationResult.isValid) {
       return createApiKeyErrorResponse(validationResult);
+    }
+
+    // Additional check: ensure the API key belongs to the authenticated user
+    if (validationResult.apiKeyData?.user_id !== authResult.user.id) {
+      return NextResponse.json(
+        { success: false, error: 'API key does not belong to authenticated user' },
+        { status: 403 }
+      );
     }
 
     // Parse request body to get GitHub URL
