@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import NavigationLayout from '@/components/layout/NavigationLayout';
-import Toast from '@/components/ui/Toast';
 
 interface ValidationResult {
   isValid: boolean;
@@ -49,7 +48,6 @@ export default function ProtectedPage() {
 
 function ProtectedPageContent() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -74,19 +72,19 @@ function ProtectedPageContent() {
     
     setValidationResult(result);
     
-    // Show toast notification
-    setToast({
-      message: result.message,
-      type: isValidBool ? 'success' : 'error'
-    });
+    // Show notification
+    if (typeof window !== 'undefined' && (window as any).addNotification) {
+      (window as any).addNotification({
+        type: 'api_alerts',
+        title: isValidBool ? 'API Key Valid' : 'API Key Invalid',
+        message: result.message,
+        duration: 5000,
+      });
+    }
   }, [router, searchParams]);
 
   const handleGoBack = () => {
     router.push('/playground');
-  };
-
-  const handleCloseToast = () => {
-    setToast(null);
   };
 
 
@@ -205,8 +203,6 @@ function ProtectedPageContent() {
           </div>
         </div>
       </div>
-
-      <Toast toast={toast} onClose={handleCloseToast} />
     </NavigationLayout>
   );
 }

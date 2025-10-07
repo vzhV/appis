@@ -11,12 +11,20 @@ const axiosInstance: AxiosInstance = axios.create({
 
 // Request interceptor to add auth headers
 axiosInstance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+  async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
     // Add auth token if available
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('supabase.auth.token');
-      if (token) {
-        config.headers.set('Authorization', `Bearer ${token}`);
+      try {
+        // Import supabase dynamically to avoid SSR issues
+        const { supabase } = await import('@/lib/supabase');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.access_token) {
+          config.headers.set('Authorization', `Bearer ${session.access_token}`);
+        }
+      } catch (error) {
+        // Silently fail if we can't get the session
+        console.warn('Failed to get auth token for request:', error);
       }
     }
     return config;
@@ -34,9 +42,22 @@ axiosInstance.interceptors.response.use(
   (error) => {
     // Handle common errors
     if (error.response?.status === 401) {
-      // Redirect to login or refresh token
+      // Only redirect to login for specific API endpoints that require authentication
+      // Skip redirect for logging endpoints to prevent navigation loops
       if (typeof window !== 'undefined') {
-        window.location.href = '/auth/login';
+        const requestUrl = error.config?.url || '';
+        const isLoggingEndpoint = requestUrl.includes('/api/logs');
+        const isSettingsEndpoint = requestUrl.includes('/api/settings');
+        
+        // Don't redirect for logging or settings API calls to prevent loops
+        if (!isLoggingEndpoint && !isSettingsEndpoint) {
+          const currentPath = window.location.pathname;
+          const isDashboardPage = currentPath.startsWith('/dashboards') || currentPath.startsWith('/playground');
+          
+          if (!isDashboardPage) {
+            window.location.href = '/auth/login';
+          }
+        }
       }
     }
     return Promise.reject(error);

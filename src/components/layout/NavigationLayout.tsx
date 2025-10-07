@@ -85,6 +85,16 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
       badge: null
     },
     {
+      name: 'GitHub Summarizer',
+      href: '/dashboards/github-summarizer',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        </svg>
+      ),
+      badge: null
+    },
+    {
       name: 'Activity Logs',
       href: '/dashboards/logs',
       icon: (
@@ -108,30 +118,30 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+    <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <div className={`${isSidebarMinimized ? 'w-16' : 'w-64'} bg-gray-800/95 backdrop-blur-xl shadow-2xl border-r border-gray-700/50 flex flex-col fixed left-0 top-0 h-full z-50 transition-all duration-300 ease-in-out`}>
+      <div className={`${isSidebarMinimized ? 'w-16' : 'w-64'} bg-card/95 backdrop-blur-xl shadow-2xl border-r border-border/40 flex flex-col fixed left-0 top-0 h-full z-50 transition-all duration-300 ease-in-out`}>
         {/* Logo & Toggle */}
-        <div className="p-6 border-b border-gray-700/50">
+        <div className="p-6 border-b border-border/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary to-chart-2 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
               </div>
               {!isSidebarMinimized && (
                 <div className="transition-all duration-300">
-                  <span className="text-xl font-bold text-white">Appis</span>
+                  <span className="text-xl font-bold text-foreground">Appis</span>
                 </div>
               )}
             </div>
             <button
               onClick={() => setIsSidebarMinimized(!isSidebarMinimized)}
-              className="p-2 hover:bg-gray-700/50 rounded-lg transition-all duration-200"
+              className="p-2 hover:bg-secondary/50 rounded-lg transition-all duration-200"
               title={isSidebarMinimized ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <svg className={`w-4 h-4 text-gray-300 transition-transform duration-300 ${isSidebarMinimized ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isSidebarMinimized ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
               </svg>
             </button>
@@ -139,7 +149,7 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
         </div>
 
         {/* User Account */}
-        <div className="p-4 border-b border-gray-700/50">
+        <div className="p-4 border-b border-border/40">
           <div className="flex items-center space-x-3">
             {user?.user_metadata?.avatar_url ? (
               <Image
@@ -150,18 +160,18 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
                 className="w-8 h-8 rounded-lg object-cover"
               />
             ) : (
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <span className="text-white text-xs font-bold">
+              <div className="w-8 h-8 bg-gradient-to-r from-primary to-chart-2 rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground text-xs font-bold">
                   {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </span>
               </div>
             )}
             {!isSidebarMinimized && (
               <div className="flex-1 transition-all duration-300">
-                <div className="text-sm font-semibold text-white truncate">
+                <div className="text-sm font-semibold text-foreground truncate">
                   {user?.user_metadata?.full_name || 'User'}
                 </div>
-                <div className="text-xs text-gray-400 truncate">
+                <div className="text-xs text-muted-foreground truncate">
                   {user?.email || 'No email'}
                 </div>
               </div>
@@ -179,12 +189,12 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
                 href={item.href}
                 className={`flex items-center ${isSidebarMinimized ? 'justify-center px-2' : 'space-x-3 px-3'} py-2.5 rounded-lg transition-all duration-200 group relative ${
                   isActive
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                    ? 'bg-primary/20 text-primary border border-primary/30'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
                 title={isSidebarMinimized ? item.name : undefined}
               >
-                <div className={`${isActive ? 'text-blue-300' : 'text-gray-400 group-hover:text-white'} transition-all duration-200`}>
+                <div className={`${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'} transition-all duration-200`}>
                   {item.icon}
                 </div>
                 {!isSidebarMinimized && (
@@ -193,14 +203,14 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
                       {item.name}
                     </span>
                     {item.badge && (
-                      <div className="ml-auto w-5 h-5 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
+                      <div className="ml-auto w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-semibold">
                         {item.badge}
                       </div>
                     )}
                   </>
                 )}
                 {isSidebarMinimized && item.badge && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-semibold">
                     {item.badge}
                   </div>
                 )}
@@ -210,19 +220,19 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
         </nav>
 
         {/* Status */}
-        <div className="p-4 border-t border-gray-700/50">
-          <div className={`flex items-center ${isSidebarMinimized ? 'justify-center' : 'space-x-3'} px-3 py-2 bg-green-500/10 rounded-lg border border-green-400/30`}>
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+        <div className="p-4 border-t border-border/40">
+          <div className={`flex items-center ${isSidebarMinimized ? 'justify-center' : 'space-x-3'} px-3 py-2 bg-chart-2/10 rounded-lg border border-chart-2/30`}>
+            <div className="w-2 h-2 bg-chart-2 rounded-full animate-pulse"></div>
             {!isSidebarMinimized && (
               <div className="flex-1 transition-all duration-300">
-                <div className="text-xs font-semibold text-green-300">Operational</div>
+                <div className="text-xs font-semibold text-chart-2">Operational</div>
               </div>
             )}
           </div>
         </div>
 
         {/* User Profile at Bottom */}
-        <div className="p-4 border-t border-gray-700/50">
+        <div className="p-4 border-t border-border/40">
           <div className="flex items-center space-x-3 group">
             {user?.user_metadata?.avatar_url ? (
               <Image
@@ -233,31 +243,31 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
                 className="w-10 h-10 rounded-xl object-cover group-hover:scale-105 transition-transform duration-200"
               />
             ) : (
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-                <span className="text-white text-sm font-bold">
+              <div className="w-10 h-10 bg-gradient-to-r from-primary to-chart-2 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
+                <span className="text-primary-foreground text-sm font-bold">
                   {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </span>
               </div>
             )}
             {!isSidebarMinimized && (
               <div className="flex-1 transition-all duration-300">
-                <div className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors duration-200">
+                <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors duration-200">
                   {user?.user_metadata?.full_name || 'User'}
                 </div>
-                <div className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors duration-200">
+                <div className="text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
                   {user?.email}
                 </div>
                 <div className="flex items-center space-x-2 mt-1">
                   <Link
                     href="/dashboards/settings"
-                    className="text-xs text-gray-500 hover:text-blue-400 transition-colors duration-200"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
                     Settings
                   </Link>
-                  <span className="text-gray-600">•</span>
+                  <span className="text-muted-foreground">•</span>
                   <button
                     onClick={async () => await signOut()}
-                    className="text-xs text-gray-500 hover:text-red-400 transition-colors duration-200"
+                    className="text-xs text-muted-foreground hover:text-destructive transition-colors duration-200"
                   >
                     Sign Out
                   </button>
@@ -271,23 +281,23 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
       {/* Main Content */}
       <div className={`flex-1 ${isSidebarMinimized ? 'ml-16' : 'ml-64'} transition-all duration-300 ease-in-out`}>
         {/* Header */}
-        <div className="sticky top-0 z-40 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 px-8 py-6">
+        <div className="sticky top-0 z-40 bg-card/95 backdrop-blur-sm border-b border-border/40 px-8 py-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-6">
               <div>
-                <div className="text-sm text-gray-400 font-medium mb-1">{pageSubtitle || 'Pages / Overview'}</div>
-                <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
+                <div className="text-sm text-muted-foreground font-medium mb-1">{pageSubtitle || 'Pages / Overview'}</div>
+                <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
               </div>
               
               {/* Quick Stats */}
               <div className="hidden lg:flex items-center space-x-4">
-                <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-500/10 rounded-lg border border-blue-400/30">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-blue-300">API Keys Active</span>
+                <div className="flex items-center space-x-2 px-3 py-1.5 bg-primary/10 rounded-lg border border-primary/30">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-primary">API Keys Active</span>
                 </div>
-                <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-500/10 rounded-lg border border-green-400/30">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-green-300">All Systems Operational</span>
+                <div className="flex items-center space-x-2 px-3 py-1.5 bg-chart-2/10 rounded-lg border border-chart-2/30">
+                  <div className="w-2 h-2 bg-chart-2 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-chart-2">All Systems Operational</span>
                 </div>
               </div>
             </div>
@@ -299,25 +309,25 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
                   <input
                     type="text"
                     placeholder="Search..."
-                    className="w-64 px-4 py-2 pl-10 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                    className="w-64 px-4 py-2 pl-10 bg-secondary/50 border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200"
                   />
-                  <svg className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
               </div>
               
               {/* Notifications */}
-              <button className="relative p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-all duration-200">
+              <button className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-all duration-200">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12 7H4.828z" />
                 </svg>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full animate-pulse"></div>
               </button>
               
               {/* Quick Actions */}
               <div className="flex items-center space-x-2">
-                <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium">
+                <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors text-sm font-medium">
                   Quick Action
                 </button>
               </div>

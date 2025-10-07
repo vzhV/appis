@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiKeysApi } from '@/lib/api/api-keys-api';
-import type { ApiKey, CreateApiKeyRequest, UpdateApiKeyRequest, ToastMessage } from '@/types/api-keys';
-import { showToast } from '@/utils/api-keys';
+import type { ApiKey, CreateApiKeyRequest, UpdateApiKeyRequest } from '@/types/api-keys';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettingsContext } from '@/contexts/SettingsContext';
 import { logApiKeyAction } from '@/utils/logger';
@@ -9,8 +8,6 @@ import { logApiKeyAction } from '@/utils/logger';
 interface UseApiKeysReturn {
   readonly apiKeys: readonly ApiKey[];
   readonly isLoading: boolean;
-  readonly toast: ToastMessage | null;
-  readonly setToast: (toast: ToastMessage | null) => void;
   readonly createApiKey: (request: CreateApiKeyRequest) => Promise<boolean>;
   readonly updateApiKey: (request: UpdateApiKeyRequest) => Promise<boolean>;
   readonly deleteApiKey: (id: string) => Promise<boolean>;
@@ -21,7 +18,18 @@ export const useApiKeys = (): UseApiKeysReturn => {
   const { settings } = useSettingsContext();
   const [apiKeys, setApiKeys] = useState<readonly ApiKey[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  // Helper function to show notifications
+  const showNotification = (title: string, message: string, type: 'success' | 'error' = 'success'): void => {
+    if (typeof window !== 'undefined' && (window as any).addNotification) {
+      (window as any).addNotification({
+        type: 'api_alerts',
+        title,
+        message,
+        duration: 5000,
+      });
+    }
+  };
 
   // Fetch API keys from the API
   useEffect(() => {
@@ -57,17 +65,7 @@ export const useApiKeys = (): UseApiKeysReturn => {
       const response = await apiKeysApi.create(requestWithDefaults);
       if (response.success) {
         setApiKeys(prev => [response.data, ...prev]);
-        showToast('API key created successfully', 'success', setToast);
-        
-        // Show notification if API alerts are enabled
-        if (settings?.notifications?.api_alerts && (window as any).addNotification) {
-          (window as any).addNotification({
-            type: 'api_alerts',
-            title: 'API Key Created',
-            message: `Successfully created API key "${request.name}"`,
-            duration: 5000,
-          });
-        }
+        showNotification('API Key Created', 'API key created successfully');
         
         // Log the creation
         await logApiKeyAction('create_key', response.data.id, request.name, {
@@ -76,17 +74,17 @@ export const useApiKeys = (): UseApiKeysReturn => {
         });
         return true;
       } else {
-        showToast(`Failed to create API key: ${response.error}`, 'error', setToast);
+        showNotification('API Key Creation Failed', `Failed to create API key: ${response.error}`, 'error');
         return false;
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error
         ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
         : 'Error creating API key';
-      showToast(errorMessage, 'error', setToast);
+      showNotification('API Key Creation Failed', errorMessage, 'error');
       return false;
     }
-  }, [settings, setToast]);
+  }, [settings]);
 
   const updateApiKey = useCallback(async (request: UpdateApiKeyRequest): Promise<boolean> => {
     try {
@@ -95,7 +93,7 @@ export const useApiKeys = (): UseApiKeysReturn => {
         setApiKeys(prev => prev.map(key => 
           key.id === request.id ? response.data : key
         ));
-        showToast('API key updated successfully', 'success', setToast);
+        showNotification('API Key Updated', 'API key updated successfully');
         // Log the update
         await logApiKeyAction('edit_key', request.id, request.name, {
           key_type: request.type,
@@ -103,17 +101,17 @@ export const useApiKeys = (): UseApiKeysReturn => {
         });
         return true;
       } else {
-        showToast(`Failed to update API key: ${response.error}`, 'error', setToast);
+        showNotification('API Key Update Failed', `Failed to update API key: ${response.error}`, 'error');
         return false;
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error 
         ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
         : 'Error updating API key';
-      showToast(errorMessage, 'error', setToast);
+      showNotification('API Key Update Failed', errorMessage, 'error');
       return false;
     }
-  }, [setToast]);
+  }, []);
 
   const deleteApiKey = useCallback(async (id: string): Promise<boolean> => {
     try {
@@ -123,30 +121,28 @@ export const useApiKeys = (): UseApiKeysReturn => {
       const response = await apiKeysApi.delete(id);
       if (response.success) {
         setApiKeys(prev => prev.filter(key => key.id !== id));
-        showToast('API key deleted successfully', 'success', setToast);
+        showNotification('API Key Deleted', 'API key deleted successfully');
         // Log the deletion
         await logApiKeyAction('delete_key', id, keyToDelete?.name, {
           key_type: keyToDelete?.type,
         });
         return true;
       } else {
-        showToast(`Failed to delete API key: ${response.error}`, 'error', setToast);
+        showNotification('API Key Deletion Failed', `Failed to delete API key: ${response.error}`, 'error');
         return false;
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error 
         ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
         : 'Error deleting API key';
-      showToast(errorMessage, 'error', setToast);
+      showNotification('API Key Deletion Failed', errorMessage, 'error');
       return false;
     }
-  }, [apiKeys, setToast]);
+  }, [apiKeys]);
 
   return {
     apiKeys,
     isLoading,
-    toast,
-    setToast,
     createApiKey,
     updateApiKey,
     deleteApiKey,

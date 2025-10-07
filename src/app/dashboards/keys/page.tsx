@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSettingsContext } from '@/contexts/SettingsContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import NavigationLayout from '@/components/layout/NavigationLayout';
-import Toast from '@/components/ui/Toast';
 import CreateEditModal from '@/components/modals/CreateEditModal';
 import DeleteConfirmationModal from '@/components/modals/DeleteConfirmationModal';
 import ApiKeysTable from '@/components/dashboard/ApiKeysTable';
@@ -20,8 +19,6 @@ function ApiKeysContent() {
   const {
     apiKeys,
     isLoading,
-    toast,
-    setToast,
     createApiKey,
     updateApiKey,
     deleteApiKey,
@@ -111,7 +108,7 @@ function ApiKeysContent() {
   };
 
   const handleCopyToClipboard = async (text: string) => {
-    await copyToClipboard(text, setToast);
+    await copyToClipboard(text);
   };
 
   if (isLoading) {
@@ -131,26 +128,26 @@ function ApiKeysContent() {
       <NavigationLayout pageTitle="API Keys Management" pageSubtitle="Pages / API Keys">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Header Section */}
-          <div className="bg-gray-800/80 backdrop-blur-sm shadow-lg rounded-2xl p-8 border border-gray-700/50">
+          <div className="bg-card/80 backdrop-blur-xl shadow-lg rounded-2xl p-8 border border-border/40">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-2">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
                   API Keys Management
                 </h2>
-                <p className="text-gray-300">
+                <p className="text-muted-foreground">
                   Create, manage, and monitor your API keys with advanced security features.
                 </p>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-400">{apiKeys.length}</div>
-                  <div className="text-sm text-gray-400">Total Keys</div>
+                  <div className="text-2xl font-bold text-primary">{apiKeys.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Keys</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-green-400">
+                  <div className="text-2xl font-bold text-chart-2">
                     {apiKeys.filter(key => key.is_active).length}
                   </div>
-                  <div className="text-sm text-gray-400">Active</div>
+                  <div className="text-sm text-muted-foreground">Active</div>
                 </div>
               </div>
             </div>
@@ -200,8 +197,6 @@ function ApiKeysContent() {
           onConfirm={confirmDeleteKey}
         />
 
-        {/* Toast */}
-        <Toast toast={toast} onClose={() => setToast(null)} />
       </NavigationLayout>
     </ProtectedRoute>
   );

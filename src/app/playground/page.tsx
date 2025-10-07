@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import NavigationLayout from '@/components/layout/NavigationLayout';
-import Toast from '@/components/ui/Toast';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -12,7 +11,6 @@ function PlaygroundContent() {
   const { session } = useAuth();
   const [apiKey, setApiKey] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,11 +41,15 @@ function PlaygroundContent() {
         const encodedMessage = encodeURIComponent(data.message);
         router.push(`/protected?valid=true&message=${encodedMessage}`);
       } else {
-        // API key is invalid, show error toast
-        setToast({
-          message: data.message,
-          type: 'error'
-        });
+        // API key is invalid, show error notification
+        if (typeof window !== 'undefined' && (window as any).addNotification) {
+          (window as any).addNotification({
+            type: 'api_alerts',
+            title: 'API Key Invalid',
+            message: data.message,
+            duration: 5000,
+          });
+        }
       }
       
     } catch (error: unknown) {
@@ -56,17 +58,18 @@ function PlaygroundContent() {
         ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message
         : 'Error validating API key';
       
-      setToast({
-        message: errorMessage,
-        type: 'error'
-      });
+      // Show error notification
+      if (typeof window !== 'undefined' && (window as any).addNotification) {
+        (window as any).addNotification({
+          type: 'api_alerts',
+          title: 'Validation Error',
+          message: errorMessage,
+          duration: 5000,
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleCloseToast = () => {
-    setToast(null);
   };
 
   return (
@@ -142,8 +145,6 @@ function PlaygroundContent() {
           </div>
         </div>
       </div>
-
-      <Toast toast={toast} onClose={handleCloseToast} />
     </NavigationLayout>
   );
 }

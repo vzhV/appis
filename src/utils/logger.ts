@@ -23,19 +23,25 @@ class Logger {
     this.isEnabled = false;
   }
 
-  private async getAuthHeaders(): Promise<HeadersInit> {
-    // Get session from Supabase
-    const { supabase } = await import('../../lib/supabase');
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.access_token) {
-      throw new Error('No authentication token available');
+  private async getAuthHeaders(): Promise<HeadersInit | null> {
+    try {
+      // Get session from Supabase
+      const { supabase } = await import('../../lib/supabase');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        console.warn('No authentication token available for logging');
+        return null;
+      }
+      
+      return {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      };
+    } catch (error) {
+      console.warn('Failed to get authentication headers for logging:', error);
+      return null;
     }
-    
-    return {
-      'Authorization': `Bearer ${session.access_token}`,
-      'Content-Type': 'application/json',
-    };
   }
 
   public async log(
@@ -49,6 +55,12 @@ class Logger {
     }
 
     try {
+      const headers = await this.getAuthHeaders();
+      if (!headers) {
+        console.warn('Cannot log activity - no authentication available:', action);
+        return false;
+      }
+
       const logData: CreateLogRequest = {
         action,
         resource_type: resourceType,
@@ -58,12 +70,12 @@ class Logger {
 
       const response = await fetch('/api/logs', {
         method: 'POST',
-        headers: await this.getAuthHeaders(),
+        headers,
         body: JSON.stringify(logData),
       });
 
       if (!response.ok) {
-        console.warn('Failed to log activity:', action);
+        console.warn('Failed to log activity:', action, 'Status:', response.status);
         return false;
       }
 
@@ -98,7 +110,12 @@ class Logger {
     page: 'dashboard' | 'keys' | 'analytics' | 'logs' | 'settings',
     additionalDetails?: Record<string, any>
   ): Promise<boolean> {
-    return this.log(`view_${page}`, page, undefined, additionalDetails);
+    // Make page view logging completely non-blocking
+    // Don't wait for the result to prevent navigation issues
+    this.log(`view_${page}`, page, undefined, additionalDetails).catch(() => {
+      // Silently fail - page view logging should never block navigation
+    });
+    return true;
   }
 
   public async logApiRequest(

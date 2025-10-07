@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiKeyFromHeader, createApiKeyErrorResponse } from '../../../utils/api-key-validation';
 import { authenticateUser, createUnauthorizedResponse } from '../../../utils/auth-middleware';
-import { fetchGithubReadme } from '../../../utils/github';
+import { fetchGithubRepoInfo } from '../../../utils/github';
 import { generateRepositorySummary } from '../../../utils/summarization';
 
 export async function POST(request: NextRequest) {
@@ -37,23 +37,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch README content from GitHub repository
-    const readmeContent = await fetchGithubReadme(githubUrl.trim());
+    // Fetch comprehensive repository information from GitHub
+    const repoInfo = await fetchGithubRepoInfo(githubUrl.trim());
 
-    if (!readmeContent) {
+    if (!repoInfo.readmeContent) {
       return NextResponse.json(
         { success: false, error: 'Could not fetch README content from the repository' },
         { status: 404 }
       );
     }
 
-    // Generate summary using LangChain
-    const summarizationResult = await generateRepositorySummary(readmeContent);
+    // Generate summary using enhanced summarization
+    const summarizationResult = await generateRepositorySummary(repoInfo.readmeContent);
 
     return NextResponse.json({
       success: true,
       data: {
         githubUrl,
+        owner: repoInfo.owner,
+        repo: repoInfo.repo,
+        stars: repoInfo.stars,
+        latestVersion: repoInfo.latestVersion,
         summary: summarizationResult.summary,
         coolFacts: summarizationResult.cool_facts
       }

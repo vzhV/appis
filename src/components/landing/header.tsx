@@ -23,6 +23,9 @@ export function Header(): React.JSX.Element {
             >
               How it Works
             </Link>
+            <Link href="/dashboards/github-summarizer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              GitHub Summarizer
+            </Link>
             <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Pricing
             </Link>

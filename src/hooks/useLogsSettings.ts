@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ActivityLog, LogFilters, CreateLogRequest, UserSettings, UpdateSettingsRequest } from '@/types/logs-settings';
+import { authenticatedFetch } from '@/lib/api/auth-helpers';
 
 interface UseLogsResult {
   logs: ActivityLog[];
@@ -23,20 +24,6 @@ export function useLogs(): UseLogsResult {
     offset: 0
   });
 
-  const getAuthHeaders = async (): Promise<HeadersInit> => {
-    const { supabase } = await import('../../lib/supabase');
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.access_token) {
-      throw new Error('No authentication token available');
-    }
-    
-    return {
-      'Authorization': `Bearer ${session.access_token}`,
-      'Content-Type': 'application/json',
-    };
-  };
-
   const loadLogs = async (filters?: LogFilters) => {
     setIsLoading(true);
     setError(null);
@@ -50,9 +37,7 @@ export function useLogs(): UseLogsResult {
       queryParams.append('limit', String(filters?.limit || 20));
       queryParams.append('offset', String(filters?.offset || 0));
 
-      const response = await fetch(`/api/logs?${queryParams}`, {
-        headers: await getAuthHeaders(),
-      });
+      const response = await authenticatedFetch(`/api/logs?${queryParams}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch logs');
@@ -90,9 +75,7 @@ export function useLogs(): UseLogsResult {
       queryParams.append('limit', String(currentFilters.limit));
       queryParams.append('offset', String(nextOffset));
 
-      const response = await fetch(`/api/logs?${queryParams}`, {
-        headers: await getAuthHeaders(),
-      });
+      const response = await authenticatedFetch(`/api/logs?${queryParams}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch more logs');
@@ -162,28 +145,12 @@ export function useSettings(): UseSettingsResult {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getAuthHeaders = async (): Promise<HeadersInit> => {
-    const { supabase } = await import('../../lib/supabase');
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.access_token) {
-      throw new Error('No authentication token available');
-    }
-    
-    return {
-      'Authorization': `Bearer ${session.access_token}`,
-      'Content-Type': 'application/json',
-    };
-  };
-
   const refreshSettings = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/settings', {
-        headers: await getAuthHeaders(),
-      });
+      const response = await authenticatedFetch('/api/settings');
 
       if (!response.ok) {
         throw new Error('Failed to fetch settings');
@@ -205,9 +172,8 @@ export function useSettings(): UseSettingsResult {
 
   const updateSettings = async (updates: UpdateSettingsRequest): Promise<boolean> => {
     try {
-      const response = await fetch('/api/settings', {
+      const response = await authenticatedFetch('/api/settings', {
         method: 'PUT',
-        headers: await getAuthHeaders(),
         body: JSON.stringify(updates),
       });
 
