@@ -21,10 +21,10 @@ async function getUserFromRequest(request: NextRequest) {
       return null;
     }
     return user;
-  } catch (error) {
-    console.error('Error getting user from token:', error);
-    return null;
-  }
+    } catch {
+      console.error('Error getting user from token');
+      return null;
+    }
 }
 
 // GET /api/logs - Get user's activity logs
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
         hasMore: logs.length === filters.limit
       }
     });
-  } catch (error) {
+    } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: log
     });
-  } catch (error) {
+    } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

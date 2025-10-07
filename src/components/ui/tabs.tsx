@@ -8,10 +8,9 @@ const Tabs = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & {
     defaultValue?: string
     value?: string
-    onValueChange?: (value: string) => void
+    onValueChange?: (_value: string) => void
   }
->(({ className, defaultValue, value, onValueChange, ...props }, ref) => {
-  const [activeTab, setActiveTab] = React.useState(defaultValue || "")
+>(({ className, defaultValue: _defaultValue, value, ...props }, ref) => {
   
   /*
   const _handleTabChange = (newValue: string) => {
@@ -24,7 +23,7 @@ const Tabs = React.forwardRef<
     <div
       ref={ref}
       className={cn("w-full", className)}
-      data-active-tab={value || activeTab}
+      data-active-tab={value}
       {...props}
     />
   )

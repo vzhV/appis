@@ -6,9 +6,9 @@ interface ApiKey {
   key: string;
   type: 'development' | 'production';
   usage: number;
-  monthly_limit?: number;
+  monthly_limit?: number | null;
   created_at: string;
-  last_used?: string;
+  last_used?: string | null;
   is_active: boolean;
 }
 

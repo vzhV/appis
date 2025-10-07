@@ -1,5 +1,4 @@
 import React from "react";
-import React from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Terminal, Code, CheckCircle2 } from "@/components/ui/icons";

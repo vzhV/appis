@@ -35,7 +35,7 @@ export default function ApiKeysTable({
     if (onCopyKey) {
       await onCopyKey(text);
     } else {
-      await copyToClipboard(text, () => {}); // Fallback if no handler provided
+      await copyToClipboard(text); // Fallback if no handler provided
     }
   }, [onCopyKey]);
 

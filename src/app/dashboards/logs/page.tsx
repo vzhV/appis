@@ -22,7 +22,7 @@ function LogsContent() {
     if (value === '') {
       delete newFilters[key];
     } else {
-      newFilters[key] = value as any;
+      (newFilters as any)[key] = value;
     }
     setFilters(newFilters);
   };

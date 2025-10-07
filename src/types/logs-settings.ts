@@ -77,6 +77,7 @@ export type LogAction =
   | 'view_keys'
   | 'view_analytics'
   | 'view_logs'
+  | 'view_settings'
   | 'api_request'
   | 'api_limit_reached'
   | 'api_error';
@@ -87,4 +88,5 @@ export type ResourceType =
   | 'settings'
   | 'dashboard'
   | 'analytics'
-  | 'logs';
+  | 'logs'
+  | 'keys';

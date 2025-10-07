@@ -56,8 +56,8 @@ export async function fetchGithubRepoInfo(githubUrl: string): Promise<GitHubRepo
     if (repoResponse.status === 200) {
       stars = repoResponse.data.stargazers_count || 0;
     }
-  } catch (error) {
-    console.warn('Failed to fetch repository metadata:', error);
+  } catch (_error) {
+    console.warn('Failed to fetch repository metadata:', _error);
   }
 
   // Fetch latest release/tag
@@ -72,7 +72,7 @@ export async function fetchGithubRepoInfo(githubUrl: string): Promise<GitHubRepo
     if (releasesResponse.status === 200) {
       latestVersion = releasesResponse.data.tag_name || null;
     }
-  } catch (error) {
+  } catch {
     // If no releases, try to get the latest tag
     try {
       const tagsResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/tags`, {

@@ -1,9 +1,9 @@
 import axiosInstance from '@/lib/api/axios-instance';
-import type { LogsSettings } from '@/types/logs-settings';
+import type { UserSettings } from '@/types/logs-settings';
 
 export interface LogsSettingsResponse {
   success: boolean;
-  data: LogsSettings;
+  data: UserSettings;
   error?: string;
 }
 
@@ -19,7 +19,7 @@ export const logsApi = {
   /**
    * Update logs settings
    */
-  async updateSettings(settings: Partial<LogsSettings>): Promise<LogsSettingsResponse> {
+  async updateSettings(settings: Partial<UserSettings>): Promise<LogsSettingsResponse> {
     const response = await axiosInstance.put<LogsSettingsResponse>('/api/logs', settings);
     return response.data;
   },

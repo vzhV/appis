@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
       
-      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       
       if (exchangeError) {
         console.error('Error exchanging code for session:', exchangeError);

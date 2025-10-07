@@ -71,7 +71,7 @@ export async function generateRepositorySummary(readmeContent: string): Promise<
   // If summary is too short, add more content
   if (summary.length < 100 && meaningfulLines.length > 5) {
     const additionalLines = meaningfulLines.slice(5, 10);
-    summary += ' ' + additionalLines.join(' ').trim();
+    summary += ` ${additionalLines.join(' ').trim()}`;
   }
   
   // Clean up the summary

@@ -29,6 +29,7 @@ export function Notification({ type, title, message, duration = 5000, onClose }:
         return () => clearTimeout(timer);
       }
     }
+    return undefined;
   }, [settings, type, duration, onClose]);
 
   if (!isVisible || !settings?.notifications?.[type]) {

@@ -1,5 +1,4 @@
 import React from "react";
-import React from "react";
 import { Card } from "@/components/ui/card";
 import { Code2, Database, Rocket } from "@/components/ui/icons";
 

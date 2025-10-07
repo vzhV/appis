@@ -36,7 +36,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
           setSession(session);
           setUser(session?.user ?? null);
         }
-      } catch (err) {
+      } catch {
         setError('Failed to get initial session');
       } finally {
         setLoading(false);
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
         setLoading(false);
       }
       // Note: The redirect will happen automatically, so we don't need to handle success here
-    } catch (err) {
+    } catch {
       setError('Failed to sign in with Google');
       setLoading(false);
     }
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
       if (error) {
         setError(error.message);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to sign out');
     }
   }, []);

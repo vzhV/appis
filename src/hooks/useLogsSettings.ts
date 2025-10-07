@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ActivityLog, LogFilters, CreateLogRequest, UserSettings, UpdateSettingsRequest } from '@/types/logs-settings';
-import { authenticatedFetch } from '@/lib/api/auth-helpers';
+import { authenticatedFetch, getAuthHeaders } from '@/lib/api/auth-helpers';
 
 interface UseLogsResult {
   logs: ActivityLog[];

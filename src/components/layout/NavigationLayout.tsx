@@ -23,7 +23,7 @@ export default function NavigationLayout({ children, pageTitle, pageSubtitle }: 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
+        // User menu functionality removed
       }
     };
 

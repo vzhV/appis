@@ -59,12 +59,7 @@ Performance and Optimization
 - Prefer server-rendered data and static generation when possible.
 
 Linting and Rules
-- Follow ESLint configuration with:
-  - eslint-config-next
-  - @typescript-eslint/recommended
-  - plugin:react-hooks/recommended
-- Enforce explicit-function-return-type: error.
-- Disallow unused variables except with underscore prefix.
+- Follow ESLint configuration in eslint.config.mjs
 - Warn for missing dependency arrays in React hooks.
 - Always fix lint issues before committing.
 

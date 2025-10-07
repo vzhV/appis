@@ -20,7 +20,7 @@ export const useApiKeys = (): UseApiKeysReturn => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Helper function to show notifications
-  const showNotification = (title: string, message: string, type: 'success' | 'error' = 'success'): void => {
+  const showNotification = (title: string, message: string, _type: 'success' | 'error' = 'success'): void => {
     if (typeof window !== 'undefined' && (window as any).addNotification) {
       (window as any).addNotification({
         type: 'api_alerts',
@@ -44,7 +44,7 @@ export const useApiKeys = (): UseApiKeysReturn => {
         if (response.success) {
           setApiKeys(response.data);
         }
-      } catch (error) {
+      } catch {
         // Error handled by toast notification
       } finally {
         setIsLoading(false);

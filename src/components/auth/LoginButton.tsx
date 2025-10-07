@@ -19,7 +19,7 @@ export default function LoginButton({ className = '', children }: LoginButtonPro
     setIsSigningIn(true);
     try {
       await signInWithGoogle();
-    } catch (error) {
+    } catch {
       // Error handled by AuthContext
     } finally {
       setIsSigningIn(false);
@@ -29,7 +29,7 @@ export default function LoginButton({ className = '', children }: LoginButtonPro
   const handleSignOut = async () => {
     try {
       await signOut();
-    } catch (error) {
+    } catch {
       // Error handled by AuthContext
     }
   };

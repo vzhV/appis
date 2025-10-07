@@ -20,10 +20,10 @@ async function getUserFromRequest(request: NextRequest): Promise<any | null> {
       return null;
     }
     return user;
-  } catch (error) {
-    console.error('Error getting user from token:', error);
-    return null;
-  }
+    } catch {
+      console.error('Error getting user from token');
+      return null;
+    }
 }
 
 // GET /api/api-keys - Get user's API keys only
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json({ success: true, data: apiKeys });
-  } catch (error) {
+    } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch API keys' },
       { status: 500 }
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json({ success: true, data: newApiKey }, { status: 201 });
-  } catch (error) {
+    } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to create API key' },
       { status: 500 }
@@ -246,7 +246,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json({ success: true, data: updatedApiKey });
-  } catch (error) {
+    } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to update API key' },
       { status: 500 }
@@ -298,7 +298,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json({ success: true, data: deletedApiKey });
-  } catch (error) {
+    } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to delete API key' },
       { status: 500 }

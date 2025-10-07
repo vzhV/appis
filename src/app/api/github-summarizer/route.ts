@@ -4,7 +4,7 @@ import { authenticateUser, createUnauthorizedResponse } from '../../../utils/aut
 import { fetchGithubRepoInfo } from '../../../utils/github';
 import { generateRepositorySummary } from '../../../utils/summarization';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Authenticate the user first
     const authResult = await authenticateUser(request);

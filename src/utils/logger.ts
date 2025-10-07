@@ -64,8 +64,8 @@ class Logger {
       const logData: CreateLogRequest = {
         action,
         resource_type: resourceType,
-        resource_id: resourceId,
-        details,
+        ...(resourceId && { resource_id: resourceId }),
+        ...(details && { details }),
       };
 
       const response = await fetch('/api/logs', {
