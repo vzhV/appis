@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '../../../../lib/supabase';
+import { validateApiKey } from '../../../utils/api-key-validation';
 
 // POST /api/validate-api-key - Validate an API key
 export async function POST(request: NextRequest) {
@@ -7,67 +7,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { apiKey } = body;
 
-    if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'API key is required' },
-        { status: 400 }
-      );
-    }
+    const validationResult = await validateApiKey(apiKey);
 
-    // Query Supabase to check if the API key exists and is active
-    const { data: apiKeyData, error } = await supabaseAdmin
-      .from('api_keys')
-      .select('id, name, key, type, is_active, usage, monthly_limit, last_used')
-      .eq('key', apiKey.trim())
-      .eq('is_active', true)
-      .single();
-
-    if (error) {
-      // If no record found, it's an invalid key
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({
-          success: true,
-          isValid: false,
-          message: 'Invalid API key'
-        });
+    if (!validationResult.isValid) {
+      if (validationResult.error === 'API key is required') {
+        return NextResponse.json(
+          { success: false, error: validationResult.error },
+          { status: 400 }
+        );
       }
       
-      console.error('Supabase error:', error);
-      return NextResponse.json(
-        { success: false, error: 'Failed to validate API key' },
-        { status: 500 }
-      );
-    }
-
-    if (!apiKeyData) {
       return NextResponse.json({
         success: true,
         isValid: false,
-        message: 'Invalid API key'
+        message: validationResult.error
       });
-    }
-
-    // Check if API key has exceeded monthly limit (if set)
-    if (apiKeyData.monthly_limit && apiKeyData.usage >= apiKeyData.monthly_limit) {
-      return NextResponse.json({
-        success: true,
-        isValid: false,
-        message: 'API key has exceeded monthly limit'
-      });
-    }
-
-    // Update last_used timestamp and increment usage
-    const { error: updateError } = await supabaseAdmin
-      .from('api_keys')
-      .update({
-        last_used: new Date().toISOString(),
-        usage: apiKeyData.usage + 1
-      })
-      .eq('id', apiKeyData.id);
-
-    if (updateError) {
-      console.error('Error updating API key usage:', updateError);
-      // Don't fail the validation if usage update fails
     }
 
     return NextResponse.json({
@@ -75,11 +29,11 @@ export async function POST(request: NextRequest) {
       isValid: true,
       message: 'Valid API key, /protected can be accessed',
       data: {
-        id: apiKeyData.id,
-        name: apiKeyData.name,
-        type: apiKeyData.type,
-        usage: apiKeyData.usage + 1,
-        monthlyLimit: apiKeyData.monthly_limit
+        id: validationResult.apiKeyData!.id,
+        name: validationResult.apiKeyData!.name,
+        type: validationResult.apiKeyData!.type,
+        usage: validationResult.apiKeyData!.usage,
+        monthlyLimit: validationResult.apiKeyData!.monthly_limit
       }
     });
 

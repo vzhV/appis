@@ -1,0 +1,54 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { validateApiKeyFromHeader, createApiKeyErrorResponse } from '../../../utils/api-key-validation';
+import { fetchGithubReadme } from '../../../utils/github';
+import { generateRepositorySummary } from '../../../utils/summarization';
+
+export async function POST(request: NextRequest) {
+  try {
+    // Validate API key
+    const validationResult = await validateApiKeyFromHeader(request);
+    if (!validationResult.isValid) {
+      return createApiKeyErrorResponse(validationResult);
+    }
+
+    // Parse request body to get GitHub URL
+    const body = await request.json();
+    const { githubUrl } = body;
+
+    if (!githubUrl || typeof githubUrl !== 'string' || githubUrl.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'GitHub URL is required' },
+        { status: 400 }
+      );
+    }
+
+    // Fetch README content from GitHub repository
+    const readmeContent = await fetchGithubReadme(githubUrl.trim());
+
+    if (!readmeContent) {
+      return NextResponse.json(
+        { success: false, error: 'Could not fetch README content from the repository' },
+        { status: 404 }
+      );
+    }
+
+    // Generate summary using LangChain
+    const summarizationResult = await generateRepositorySummary(readmeContent);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        githubUrl,
+        summary: summarizationResult.summary,
+        coolFacts: summarizationResult.cool_facts
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in GitHub summarizer:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to process GitHub repository' },
+      { status: 500 }
+    );
+  }
+}
